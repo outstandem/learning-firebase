@@ -1,0 +1,62 @@
+<!-- Adv: 
+    adding limited queries  -->
+<!doctype html>
+<html>
+  <head>
+    <script type='text/javascript' src='https://cdn.firebase.com/js/client/1.0.6/firebase.js'></script>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js'></script>
+  </head>
+  <body>
+
+    <h1>Chat</h1>
+      <div id='messagesDiv'></div>
+      <input type='text' id='nameInput' placeholder='Name'>
+      <input type='text' id='messageInput' placeholder='Message'>
+    <h1>Users</h1>
+      <div id='usersDiv'></div>
+    <!-- <h1>Todo</h1>
+      <div id='todoDiv'></div> -->
+
+    <script>
+      var myChatRef   = new Firebase('https://i9hzz7houvb.firebaseio-demo.com/chat');
+      var myUsersRef  = new Firebase('https://i9hzz7houvb.firebaseio-demo.com/users');
+      //var myTodoRef   = new Firebase('https://i9hzz7houvb.firebaseio-demo.com/todo');
+
+      $('#messageInput').keypress(function (e) {
+        if (e.keyCode == 13) {
+          var name = $('#nameInput').val();
+          var text = $('#messageInput').val();
+          myChatRef.push({name: name, text: text, date: Date.now()});
+
+          // create a new url for this user 
+          var atUserData = new Firebase('https://i9hzz7houvb.firebaseio-demo.com/users/' + name);
+          // set a data point
+          atUserData.set(true)
+
+          $('#messageInput').val('');
+        }
+      });
+
+      // This is unlimited
+      myChatRef.on('child_added', function(snapshot) {
+        var message = snapshot.val();
+        displayChatMessage(message.name, message.text); //we pushed name & text
+      });
+
+      myUsersRef.on('child_added', function(snapshot) {
+        displayUser(snapshot.name()); //name is the key 
+      });
+
+      function displayChatMessage(name, text) {
+        $('<div/>').text(text).prepend($('<em/>').text(name+': ')).appendTo($('#messagesDiv'));
+        $('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
+      };
+
+      function displayUser(user) {
+        $('<div/>').text(user).appendTo($('#usersDiv'));
+      }
+    </script>
+  </body>
+</html>
+
+<!-- https://fiery-fire-7785.firebaseio.com/ -->
